@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Legal Action Assistant (India)</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Marked for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(rgba(11, 15, 25, 0.70), rgba(11, 15, 25, 0.80)), url('/chat_bot.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.35);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-input:focus {
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+            outline: none;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+
+        /* Markdown Styles */
+        .prose {
+            font-family: 'Lora', serif;
+        }
+
+        .prose h3 {
+            color: #fbbf24;
+            /* Amber/Gold */
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+            padding-bottom: 0.25rem;
+        }
+
+        .prose ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1.25rem;
+            color: #e2e8f0;
+        }
+
+        .prose li {
+            margin-bottom: 0.5rem;
+            line-height: 1.7;
+        }
+
+        .prose p {
+            margin-bottom: 1.25rem;
+            color: #cbd5e1;
+            line-height: 1.75;
+        }
+
+        .prose hr {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        .prose em {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .tilt-card {
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+            will-change: transform;
+            transition: transform 0.5s ease, background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .tilt-card-inner {
+            transform: translateZ(30px);
+            transform-style: preserve-3d;
+        }
+        
+        /* Door opening transitions */
+        .door-left {
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .door-right {
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .door-open-left {
+            transform: translateX(-100%);
+        }
+        .door-open-right {
+            transform: translateX(100%);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col text-slate-100">
+    <!-- Intro Video Overlay (Fades Out) -->
+    <div id="video-door-overlay" class="fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center transition-opacity duration-[1500ms] ease-in-out pointer-events-auto">
+        <video id="intro-video" class="w-full h-full object-cover" autoplay muted playsinline>
+            <source src="/chat_bot_video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        
+        
+        <!-- Skip Intro Button -->
+        <button onclick="openDoors()" class="absolute bottom-8 right-8 z-30 bg-slate-900/80 hover:bg-slate-800 text-slate-300 px-6 py-2.5 rounded-full border border-slate-700/80 text-sm tracking-wider transition-all duration-200 shadow-xl hover:text-amber-400 hover:border-amber-500/50 flex items-center space-x-2">
+            <span>Skip Intro</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-card sticky top-0 z-50 px-6 py-4 flex items-center justify-between shadow-lg">
+        <div onclick="goHome()"
+            class="flex items-center space-x-3 cursor-pointer hover:opacity-90 transition-all duration-200">
+            <div
+                class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/30">
+                <i class="fa-solid fa-scale-balanced fa-lg"></i>
+            </div>
+            <div>
+                <h1 id="ui-title"
+                    class="font-bold text-xl tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-slate-100">
+                    AI Legal Action Assistant</h1>
+                <p id="ui-subtitle" class="text-xs text-slate-400 font-medium tracking-wider uppercase">India Legal
+                    Guide</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button id="back-btn" onclick="goHome()"
+                class="hidden flex items-center space-x-2 text-sm bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50 text-slate-300 hover:bg-slate-700/50 hover:text-amber-400 transition-all duration-200 shadow-lg cursor-pointer">
+                <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
+            </button>
+
+            <div class="relative" id="language-selector-container">
+                <button id="lang-btn" onclick="toggleLangDropdown()"
+                    class="flex items-center space-x-2 text-sm bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50 text-slate-300 hover:bg-slate-700/50 hover:text-amber-400 transition-all duration-200 shadow-lg cursor-pointer">
+                    <i class="fa-solid fa-globe"></i> <span id="current-lang">English</span>
+                </button>
+
+                <div id="lang-dropdown"
+                    class="hidden absolute right-0 mt-2 w-64 glass-card rounded-2xl shadow-2xl border border-slate-700/50 z-50 p-3 flex flex-col gap-2">
+                    <div class="relative">
+                        <input type="text" id="lang-search" placeholder="Search language..." oninput="filterLanguages()"
+                            class="w-full glass-input text-xs text-slate-100 rounded-xl py-2 px-3 pr-8 focus:outline-none">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-slate-500 text-xs"></i>
+                    </div>
+                    <div class="max-h-60 overflow-y-auto flex flex-col gap-1 mt-1 text-xs" id="lang-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full px-6 md:px-12 py-3 flex flex-col gap-4 overflow-hidden">
+
+        <!-- Initial Welcome State / Suggestions -->
+        <div id="welcome-screen"
+            class="flex-1 flex flex-col justify-center items-start text-left px-6 py-4 max-w-4xl -mt-2 -ml-10">
+            <div
+                class="w-[77px] h-[77px] rounded-full bg-slate-800/50 border border-slate-700 flex items-center justify-center text-amber-400 text-3xl mb-2 shadow-xl">
+                <i class="fa-solid fa-gavel animate-bounce"></i>
+            </div>
+            <h2 id="ui-welcome-title"
+                class="text-4xl md:text-6xl font-black mb-2 text-white tracking-tight leading-tight">Understand Your
+                Legal Rights</h2>
+            <p id="ui-welcome-subtitle" class="text-slate-300 max-w-2xl mb-4 text-base md:text-lg leading-relaxed">Ask
+                about any legal situation in India. Get immediate action plans, relevant legal sections, and steps for
+                formal recourse.</p>
+
+            <!-- Pre-built Queries -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-5xl">
+                <button onclick="setQuery('Police has taken my bike key. Is this legal?')"
+                    class="glass-card tilt-card p-6 min-h-[160px] rounded-xl text-left hover:border-amber-500/50 transition-all duration-300 group flex flex-col justify-between">
+                    <div class="flex flex-col items-start space-y-3 tilt-card-inner">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors duration-300">
+                            <i class="fa-solid fa-motorcycle"></i>
+                        </div>
+                        <div>
+                            <p id="ui-q1-title" class="text-sm font-semibold text-slate-200">Traffic & Police Rights</p>
+                            <p id="ui-q1-text" class="text-xs text-slate-400 mt-1">"Police has taken my bike key."</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button onclick="setQuery('Landlord is refusing to return my security deposit after moving out.')"
+                    class="glass-card tilt-card p-6 min-h-[160px] rounded-xl text-left hover:border-amber-500/50 transition-all duration-300 group flex flex-col justify-between">
+                    <div class="flex flex-col items-start space-y-3 tilt-card-inner">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors duration-300">
+                            <i class="fa-solid fa-house-user"></i>
+                        </div>
+                        <div>
+                            <p id="ui-q2-title" class="text-sm font-semibold text-slate-200">Tenant & Property Law</p>
+                            <p id="ui-q2-text" class="text-xs text-slate-400 mt-1">"Landlord not returning deposit."</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button
+                    onclick="setQuery('Bought a mobile online but received a fake one and the company rejects my return.')"
+                    class="glass-card tilt-card p-6 min-h-[160px] rounded-xl text-left hover:border-amber-500/50 transition-all duration-300 group flex flex-col justify-between">
+                    <div class="flex flex-col items-start space-y-3 tilt-card-inner">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors duration-300">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </div>
+                        <div>
+                            <p id="ui-q3-title" class="text-sm font-semibold text-slate-200">Consumer Protection</p>
+                            <p id="ui-q3-text" class="text-xs text-slate-400 mt-1">"Online delivery fraud & returns."
+                            </p>
+                        </div>
+                    </div>
+                </button>
+
+                <button onclick="setQuery('How can I file an RTI (Right to Information) application online?')"
+                    class="glass-card tilt-card p-6 min-h-[160px] rounded-xl text-left hover:border-amber-500/50 transition-all duration-300 group flex flex-col justify-between">
+                    <div class="flex flex-col items-start space-y-3 tilt-card-inner">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-900 transition-colors duration-300">
+                            <i class="fa-solid fa-file-signature"></i>
+                        </div>
+                        <div>
+                            <p id="ui-q4-title" class="text-sm font-semibold text-slate-200">Civil Rights & RTI</p>
+                            <p id="ui-q4-text" class="text-xs text-slate-400 mt-1">"How to file an RTI application."</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Messages Container (Hidden initially) -->
+        <div id="chat-container" class="hidden flex-1 overflow-y-auto px-2 py-4 space-y-6 max-w-4xl w-full mx-auto">
+            <!-- Messages populated here -->
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="chat-form" class="glass-card p-5 rounded-2xl shadow-2xl max-w-5xl w-full mx-auto">
+            <div class="flex items-end space-x-4">
+                <div class="flex-1 relative">
+                    <textarea id="user-input" rows="1" placeholder="Describe your legal situation in detail..."
+                        class="w-full glass-input text-slate-100 rounded-xl py-4 px-6 pr-16 resize-none max-h-36 overflow-y-auto transition-all duration-200 ease-in-out text-lg"
+                        required></textarea>
+                    <div class="absolute right-4 bottom-4 text-slate-500 text-sm" id="char-count">0/500</div>
+                </div>
+                <!-- Voice to Text Mic Button -->
+                <button type="button" id="mic-btn"
+                    class="bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-amber-400 p-3.5 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center h-[60px] w-[60px] flex-shrink-0"
+                    data-tooltip="Voice to Text">
+                    <i class="fa-solid fa-microphone text-xl"></i>
+                </button>
+                <button type="submit" id="send-btn" data-tooltip="Send legal query"
+                    class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold p-3.5 rounded-xl shadow-lg shadow-amber-500/20 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed h-[60px] w-[60px]">
+                    <i class="fa-solid fa-paper-plane text-xl"></i>
+                </button>
+            </div>
+        </form>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800/50 glass-card bg-slate-950/20">
+        © 2026 AI Legal Action Assistant (India). Designed for legal literacy.
+    </footer>
+
+    <script>
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const charCount = document.getElementById('char-count');
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            charCount.textContent = `${this.value.length}/500`;
+            if (this.value.length > 500) {
+                charCount.classList.add('text-rose-400');
+            } else {
+                charCount.classList.remove('text-rose-400');
+            }
+        });
+
+        function setQuery(queryKey) {
+            const trans = uiTranslations[selectedLanguage] || uiTranslations['English'];
+            let text = trans[queryKey + '_full'];
+
+            if (!text) {
+                const fallbackMap = {
+                    'Police has taken my bike key. Is this legal?': 'query1_full',
+                    'Landlord is refusing to return my security deposit after moving out.': 'query2_full',
+                    'Bought a mobile online but received a fake one and the company rejects my return.': 'query3_full',
+                    'How can I file an RTI (Right to Information) application online?': 'query4_full'
+                };
+                const key = fallbackMap[queryKey];
+                text = key ? trans[key] : queryKey;
+            }
+
+            userInput.value = text;
+            userInput.style.height = 'auto';
+            userInput.style.height = (userInput.scrollHeight) + 'px';
+            userInput.focus();
+            charCount.textContent = `${text.length}/500`;
+
+            // Automatically submit the query
+            chatForm.requestSubmit();
+        }
+
+        function goHome() {
+            welcomeScreen.classList.remove('hidden');
+            chatContainer.classList.add('hidden');
+            document.getElementById('back-btn').classList.add('hidden');
+            // Reset form state
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            charCount.textContent = '0/500';
+
+            // Stop text-to-speech if active
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                if (typeof setSpeakState === 'function') {
+                    document.querySelectorAll('.speak-btn').forEach(b => setSpeakState(b, false));
+                }
+            }
+        }
+
+        // Speech Recognition
+        const micBtn = document.getElementById('mic-btn');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-IN';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            let isRecording = false;
+
+            micBtn.addEventListener('click', () => {
+                if (!isRecording) {
+                    recognition.start();
+                } else {
+                    recognition.stop();
+                }
+            });
+
+            recognition.onstart = () => {
+                isRecording = true;
+                micBtn.classList.remove('bg-slate-800/80', 'text-slate-300');
+                micBtn.classList.add('bg-rose-500/20', 'text-rose-400', 'border-rose-500/30', 'animate-pulse');
+                micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash text-base"></i>';
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userInput.value += (userInput.value ? ' ' : '') + transcript;
+                userInput.dispatchEvent(new Event('input'));
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error', event.error);
+                stopRecordingState();
+            };
+
+            recognition.onend = () => {
+                stopRecordingState();
+            };
+
+            function stopRecordingState() {
+                isRecording = false;
+                micBtn.classList.add('bg-slate-800/80', 'text-slate-300');
+                micBtn.classList.remove('bg-rose-500/20', 'text-rose-400', 'border-rose-500/30', 'animate-pulse');
+                micBtn.innerHTML = '<i class="fa-solid fa-microphone text-base"></i>';
+            }
+        } else {
+            micBtn.title = "Speech Recognition not supported in this browser";
+            micBtn.disabled = true;
+            micBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Hide welcome screen, show chat
+            welcomeScreen.classList.add('hidden');
+            chatContainer.classList.remove('hidden');
+            document.getElementById('back-btn').classList.remove('hidden');
+
+            // Append User Message
+            appendMessage(message, 'user');
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            charCount.textContent = '0/500';
+
+            // Disable input & button
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+
+            // Append Loading Placeholder
+            const loadingId = 'loading-' + Date.now();
+            appendLoading(loadingId);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, language: selectedLanguage })
+                });
+
+                const data = await response.json();
+                document.getElementById(loadingId).remove();
+
+                if (data.error) {
+                    appendMessage(data.error, 'error');
+                } else {
+                    appendMessage(data.response, 'ai');
+                }
+            } catch (error) {
+                document.getElementById(loadingId).remove();
+                appendMessage('Failed to connect to backend server.', 'error');
+            } finally {
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        });
+
+        function appendMessage(text, sender) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex flex-col animate-fade-in';
+
+            let contentHtml = '';
+            let iconClass = '';
+            let iconBg = '';
+            let borderStyle = '';
+
+            if (sender === 'user') {
+                wrapper.classList.add('items-end');
+                contentHtml = `<div class="bg-slate-800/70 text-slate-200 rounded-2xl rounded-br-none px-4 py-3 max-w-[85%] border border-slate-700/40 shadow-md">${escapeHtml(text)}</div>`;
+            } else if (sender === 'ai') {
+                wrapper.classList.add('items-start');
+                iconClass = 'fa-scale-balanced';
+                iconBg = 'bg-amber-500 text-slate-950';
+                borderStyle = 'border-amber-500/20';
+
+                // Parse markdown using marked.js
+                const parsedText = marked.parse(text);
+
+                contentHtml = `
+                    <div class="flex items-start space-x-3 max-w-[90%]">
+                        <div class="w-8 h-8 rounded-xl ${iconBg} flex items-center justify-center flex-shrink-0 shadow-md mt-1">
+                            <i class="fa-solid ${iconClass} text-xs"></i>
+                        </div>
+                        <div class="glass-card rounded-2xl rounded-bl-none px-5 py-4 text-slate-200 border ${borderStyle} shadow-xl prose max-w-none">
+                            ${parsedText}
+                            <div class="mt-3 flex items-center space-x-4">
+                                <button onclick="copyText(this)" class="text-xs text-slate-400 hover:text-amber-400 flex items-center space-x-1 transition-colors">
+                                    <i class="fa-regular fa-copy"></i> <span>Copy Response</span>
+                                </button>
+                                <button onclick="speakText(this)" class="speak-btn text-xs text-slate-400 hover:text-amber-400 flex items-center space-x-1 transition-colors">
+                                    <i class="fa-solid fa-volume-high"></i> <span>Listen</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (sender === 'error') {
+                wrapper.classList.add('items-center');
+                contentHtml = `<div class="bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl px-4 py-2 text-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span>${text}</span>
+                </div>`;
+            }
+
+            wrapper.innerHTML = contentHtml;
+            chatContainer.appendChild(wrapper);
+
+            if (sender === 'ai') {
+                // Smooth scroll to the start of the AI response
+                chatContainer.scrollTo({
+                    top: wrapper.offsetTop - 10,
+                    behavior: 'smooth'
+                });
+            } else {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        function appendLoading(id) {
+            const wrapper = document.createElement('div');
+            wrapper.id = id;
+            wrapper.className = 'flex flex-col items-start animate-fade-in';
+            wrapper.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md mt-1">
+                        <i class="fa-solid fa-scale-balanced text-xs text-slate-500 animate-pulse"></i>
+                    </div>
+                    <div class="glass-card rounded-2xl rounded-bl-none px-4 py-3 border border-slate-800 shadow-md flex items-center space-x-2 text-slate-400 text-sm">
+                        <div class="flex space-x-1.5">
+                            <div class="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            <div class="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+                        </div>
+                        <span>Consulting legal database...</span>
+                    </div>
+                </div>`;
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function copyText(btn) {
+            const contentDiv = btn.closest('.glass-card');
+            const clone = contentDiv.cloneNode(true);
+            const buttons = clone.querySelectorAll('button');
+            buttons.forEach(b => b.remove());
+            const textToCopy = clone.innerText.trim();
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const span = btn.querySelector('span');
+                const icon = btn.querySelector('i');
+
+                span.textContent = 'Copied!';
+                icon.className = 'fa-solid fa-check text-emerald-400';
+
+                setTimeout(() => {
+                    span.textContent = 'Copy Response';
+                    icon.className = 'fa-regular fa-copy';
+                }, 2000);
+            });
+        }
+
+        let currentUtterance = null;
+        let currentAudio = null;
+
+        function speakText(btn) {
+            const contentDiv = btn.closest('.glass-card');
+            const clone = contentDiv.cloneNode(true);
+            const buttons = clone.querySelectorAll('button');
+            buttons.forEach(b => b.remove());
+            const textToSpeak = clone.innerText.trim();
+
+            const code = languageCodes[selectedLanguage] || { google: 'en', speech: 'en-US' };
+
+            if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+
+            if (btn.querySelector('span').textContent === 'Stop') {
+                document.querySelectorAll('.speak-btn').forEach(b => setSpeakState(b, false));
+                return;
+            }
+
+            document.querySelectorAll('.speak-btn').forEach(b => setSpeakState(b, false));
+
+            const useBackend = (selectedLanguage === 'Marathi (मराठी)' || selectedLanguage === 'Telugu (తెలుగు)');
+
+            if (useBackend) {
+                playBackendTTS(textToSpeak, code.google, btn);
+            } else {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    utterance.lang = code.speech;
+
+                    const setBestVoice = () => {
+                        const voices = window.speechSynthesis.getVoices();
+                        let voice = voices.find(v => v.lang === code.speech);
+                        if (!voice) {
+                            voice = voices.find(v => v.lang.startsWith(code.speech.split('-')[0]));
+                        }
+                        if (voice) {
+                            utterance.voice = voice;
+                            setSpeakState(btn, true);
+                            window.speechSynthesis.speak(utterance);
+                        } else {
+                            playBackendTTS(textToSpeak, code.google, btn);
+                        }
+                    };
+
+                    let voices = window.speechSynthesis.getVoices();
+                    if (voices.length === 0) {
+                        window.speechSynthesis.onvoiceschanged = () => {
+                            setBestVoice();
+                            window.speechSynthesis.onvoiceschanged = null;
+                        };
+                        setTimeout(() => {
+                            if (window.speechSynthesis.getVoices().length > 0 && !window.speechSynthesis.speaking && !currentAudio) {
+                                setBestVoice();
+                            }
+                        }, 500);
+                    } else {
+                        setBestVoice();
+                    }
+
+                    utterance.onend = () => {
+                        setSpeakState(btn, false);
+                    };
+
+                    utterance.onerror = (e) => {
+                        console.error('SpeechSynthesis Error:', e);
+                        setSpeakState(btn, false);
+                    };
+
+                    currentUtterance = utterance;
+                    currentUtterance.btn = btn;
+                } else {
+                    playBackendTTS(textToSpeak, code.google, btn);
+                }
+            }
+        }
+
+        function playBackendTTS(text, langCode, btn) {
+            setSpeakState(btn, true);
+            currentAudio = new Audio(`/api/tts?text=${encodeURIComponent(text)}&lang=${langCode}`);
+
+            currentAudio.onended = () => {
+                setSpeakState(btn, false);
+                currentAudio = null;
+            };
+
+            currentAudio.onerror = (e) => {
+                console.error('Backend TTS Error:', e);
+                setSpeakState(btn, false);
+                currentAudio = null;
+                alert('Failed to play text-to-speech.');
+            };
+
+            currentAudio.play().catch(err => {
+                console.error('Playback failed:', err);
+                setSpeakState(btn, false);
+                currentAudio = null;
+            });
+        }
+
+        function setSpeakState(btn, isSpeaking) {
+            const span = btn.querySelector('span');
+            const icon = btn.querySelector('i');
+            if (isSpeaking) {
+                span.textContent = 'Stop';
+                icon.className = 'fa-solid fa-stop text-rose-400';
+                btn.classList.add('text-rose-400');
+                btn.classList.remove('text-slate-400', 'hover:text-amber-400');
+            } else {
+                span.textContent = 'Listen';
+                icon.className = 'fa-solid fa-volume-high';
+                btn.classList.remove('text-rose-400');
+                btn.classList.add('text-slate-400', 'hover:text-amber-400');
+            }
+        }
+
+        // 3D Tilt and Glow Effect for Suggestion Cards
+        const tiltCards = document.querySelectorAll('.tilt-card');
+
+        tiltCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const xc = rect.width / 2;
+                const yc = rect.height / 2;
+
+                const dx = x - xc;
+                const dy = y - yc;
+
+                const maxRotateX = 15; // degrees
+                const maxRotateY = 15; // degrees
+
+                const rotateX = (dy / yc) * -maxRotateX;
+                const rotateY = (dx / xc) * maxRotateY;
+
+                card.style.transition = 'none';
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+                // Glow effect
+                const glowX = (x / rect.width) * 100;
+                const glowY = (y / rect.height) * 100;
+                card.style.background = `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(245, 158, 11, 0.3), rgba(30, 41, 59, 0.5))`;
+                card.style.borderColor = `rgba(245, 158, 11, 0.6)`;
+                card.style.boxShadow = `0 10px 30px -10px rgba(245, 158, 11, 0.3)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transition = 'transform 0.5s ease, background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease';
+                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+                card.style.background = '';
+                card.style.borderColor = '';
+                card.style.boxShadow = '';
+            });
+        });
+
+        // Language Selector Logic
+        const languages = [
+            "English", "Hindi (हिन्दी)", "Spanish (Español)", "French (Français)", "German (Deutsch)",
+            "Mandarin (中文)", "Arabic (العربية)", "Russian (Русский)", "Portuguese (Português)",
+            "Bengali (বাংলা)", "Punjabi (ਪੰਜਾਬੀ)", "Marathi (मराठी)", "Telugu (తెలుగు)",
+            "Tamil (தமிழ்)", "Gujarati (ગુજરાતી)", "Urdu (اردו)", "Kannada (ಕನ್ನಡ)",
+            "Odia (ଓଡ଼ିଆ)", "Malayalam (മലയാളം)", "Assamese (অसमীয়া)", "Maithili (मैथिली)",
+            "Sanskrit (संस्कृत)", "Japanese (日本語)", "Korean (한국어)", "Italian (Italiano)",
+            "Turkish (Türkçe)", "Vietnamese (Tiếng Việt)", "Polish (Polski)", "Ukrainian (Українська)",
+            "Dutch (Nederlands)", "Thai (ไทย)", "Filipino (Tagalog)", "Indonesian (Bahasa Indonesia)",
+            "Persian (فارसी)", "Hebrew (עברית)", "Greek (Ελληνικά)", "Czech (Čeština)",
+            "Swedish (Svenska)", "Romanian (Română)", "Hungarian (Magyar)", "Danish (Dansk)",
+            "Finnish (Suomi)", "Norwegian (Norsk)"
+        ];
+
+        const languageCodes = {
+            "English": { google: "en", speech: "en-US" },
+            "Hindi (हिन्दी)": { google: "hi", speech: "hi-IN" },
+            "Spanish (Español)": { google: "es", speech: "es-ES" },
+            "French (Français)": { google: "fr", speech: "fr-FR" },
+            "German (Deutsch)": { google: "de", speech: "de-DE" },
+            "Mandarin (中文)": { google: "zh-CN", speech: "zh-CN" },
+            "Arabic (العربية)": { google: "ar", speech: "ar-SA" },
+            "Russian (Русский)": { google: "ru", speech: "ru-RU" },
+            "Portuguese (Português)": { google: "pt", speech: "pt-PT" },
+            "Bengali (বাংলা)": { google: "bn", speech: "bn-IN" },
+            "Punjabi (ਪੰਜਾਬੀ)": { google: "pa", speech: "pa-IN" },
+            "Marathi (मराठी)": { google: "mr", speech: "mr-IN" },
+            "Telugu (తెలుగు)": { google: "te", speech: "te-IN" },
+            "Tamil (தமிழ்)": { google: "ta", speech: "ta-IN" },
+            "Gujarati (ગુજરાતી)": { google: "gu", speech: "gu-IN" },
+            "Urdu (اردو)": { google: "ur", speech: "ur-PK" },
+            "Kannada (ಕನ್ನಡ)": { google: "kn", speech: "kn-IN" },
+            "Odia (ଓଡ଼ିଆ)": { google: "or", speech: "or-IN" },
+            "Malayalam (മലയാളം)": { google: "ml", speech: "ml-IN" },
+            "Assamese (অसमীया)": { google: "as", speech: "as-IN" },
+            "Maithili (मैथिली)": { google: "mai", speech: "hi-IN" },
+            "Sanskrit (संस्कृत)": { google: "sa", speech: "hi-IN" },
+            "Japanese (日本語)": { google: "ja", speech: "ja-JP" },
+            "Korean (한국어)": { google: "ko", speech: "ko-KR" },
+            "Italian (Italiano)": { google: "it", speech: "it-IT" },
+            "Turkish (Türkçe)": { google: "tr", speech: "tr-TR" },
+            "Vietnamese (Tiếng Việt)": { google: "vi", speech: "vi-VN" },
+            "Polish (Polski)": { google: "pl", speech: "pl-PL" },
+            "Ukrainian (Українська)": { google: "uk", speech: "uk-UA" },
+            "Dutch (Nederlands)": { google: "nl", speech: "nl-NL" },
+            "Thai (ไทย)": { google: "th", speech: "th-TH" },
+            "Filipino (Tagalog)": { google: "tl", speech: "fil-PH" },
+            "Indonesian (Bahasa Indonesia)": { google: "id", speech: "id-ID" },
+            "Persian (فਾਰसी)": { google: "fa", speech: "fa-IR" },
+            "Hebrew (עברית)": { google: "iw", speech: "he-IL" },
+            "Greek (Ελληνικά)": { google: "el", speech: "el-GR" },
+            "Czech (Čeština)": { google: "cs", speech: "cs-CZ" },
+            "Swedish (Svenska)": { google: "sv", speech: "sv-SE" },
+            "Romanian (Română)": { google: "ro", speech: "ro-RO" },
+            "Hungarian (Magyar)": { google: "hu", speech: "hu-HU" },
+            "Danish (Dansk)": { google: "da", speech: "da-DK" },
+            "Finnish (Suomi)": { google: "fi", speech: "fi-FI" },
+            "Norwegian (Norsk)": { google: "no", speech: "no-NO" }
+        };
+
+        let selectedLanguage = 'English';
+
+        function populateLanguages() {
+            const langList = document.getElementById('lang-list');
+            langList.innerHTML = '';
+
+            const allowedLangs = ["English", "Hindi (हिन्दी)", "Marathi (मराठी)", "Telugu (తెలుగు)"];
+            allowedLangs.forEach(lang => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'text-left px-3 py-2 rounded-lg hover:bg-slate-800/50 text-slate-300 hover:text-amber-400 transition-colors duration-150 w-full';
+                btn.textContent = lang;
+                btn.onclick = () => selectLanguage(lang);
+                langList.appendChild(btn);
+            });
+        }
+
+        function toggleLangDropdown() {
+            const dropdown = document.getElementById('lang-dropdown');
+            dropdown.classList.toggle('hidden');
+            if (!dropdown.classList.contains('hidden')) {
+                document.getElementById('lang-search').value = '';
+                filterLanguages();
+                document.getElementById('lang-search').focus();
+            }
+        }
+
+        const uiTranslations = {
+            "English": {
+                "title": "AI Legal Action Assistant",
+                "subtitle": "India Legal Guide",
+                "welcome_title": "Understand Your Legal Rights",
+                "welcome_subtitle": "Ask about any legal situation in India. Get immediate action plans, relevant legal sections, and steps for formal recourse.",
+                "placeholder": "Describe your legal situation in detail...",
+                "back": "Back",
+                "listen": "Listen",
+                "stop": "Stop",
+                "copy": "Copy Response",
+                "copied": "Copied!",
+                "consulting": "Consulting legal database...",
+                "query1_title": "Traffic & Police Rights",
+                "query1_text": "\"Police has taken my bike key.\"",
+                "query2_title": "Tenant & Property Law",
+                "query2_text": "\"Landlord not returning deposit.\"",
+                "query3_title": "Consumer Protection",
+                "query3_text": "\"Online delivery fraud & returns.\"",
+                "query4_title": "Civil Rights & RTI",
+                "query4_text": "\"How to file an RTI application.\"",
+                "query1_full": "Police has taken my bike key. Is this legal?",
+                "query2_full": "Landlord is refusing to return my security deposit after moving out.",
+                "query3_full": "Bought a mobile online but received a fake one and the company rejects my return.",
+                "query4_full": "How can I file an RTI (Right to Information) application online?"
+            },
+            "Hindi (हिन्दी)": {
+                "title": "एआई कानूनी कार्रवाई सहायक",
+                "subtitle": "भारत कानूनी गाइड",
+                "welcome_title": "अपने कानूनी अधिकारों को समझें",
+                "welcome_subtitle": "भारत में किसी भी कानूनी स्थिति के बारे में पूछें। तत्काल कार्रवाई योजनाएं, प्रासंगिक कानूनी धाराएं और औपचारिक सहारा के कदम प्राप्त करें।",
+                "placeholder": "अपनी कानूनी स्थिति का विस्तार से वर्णन करें...",
+                "back": "पीछे",
+                "listen": "सुनें",
+                "stop": "रोकें",
+                "copy": "जवाब कॉपी करें",
+                "copied": "कॉपी किया गया!",
+                "consulting": "कानूनी डेटाबेस से परामर्श कर रहे हैं...",
+                "query1_title": "यातायात और पुलिस अधिकार",
+                "query1_text": "\"पुलिस ने मेरी बाइक की चाबी ले ली है।\"",
+                "query2_title": "किराएदार और संपत्ति कानून",
+                "query2_text": "\"मकान मालिक जमा राशि वापस नहीं कर रहा है।\"",
+                "query3_title": "उपभोक्ता संरक्षण",
+                "query3_text": "\"ऑनलाइन डिलीवरी धोखाधड़ी और रिटर्न।\"",
+                "query4_title": "नागरिक अधिकार और आरटीआई",
+                "query4_text": "\"आरटीआई आवेदन कैसे फाइल करें।\"",
+                "query1_full": "पुलिस ने मेरी बाइक की चाबी ले ली है। क्या यह कानूनी है?",
+                "query2_full": "मकान मालिक खाली करने के बाद मेरी सुरक्षा जमा राशि वापस करने से इनकार कर रहा है।",
+                "query3_full": "ऑनलाइन मोबाइल खरीदा लेकिन नकली मिला और कंपनी मेरी वापसी को खारिज कर रही है।",
+                "query4_full": "मैं ऑनलाइन आरटीआई (सूचना का अधिकार) आवेदन कैसे दायर कर सकता हूं?"
+            },
+            "Marathi (मराठी)": {
+                "title": "एआय कायदेशीर कृती सहाय्यक",
+                "subtitle": "भारत कायदेशीर मार्गदर्शक",
+                "welcome_title": "तुमचे कायदेशीर अधिकार समजून घ्या",
+                "welcome_subtitle": "भारतातील कोणत्याही कायदेशीर परिस्थितीबद्दल विचారా. त्वरित कृती योजना, संबंधित कायदेशीर कलमे आणि औपचारिक उपायांसाठी पावले मिळवा.",
+                "placeholder": "तुमच्या कायदेशीर परिस्थितीचे तपशीलवार वर्णन करा...",
+                "back": "मागे",
+                "listen": "ऐका",
+                "stop": "थांबा",
+                "copy": "उत्तर कॉपी करा",
+                "copied": "कॉपी केले!",
+                "consulting": "कायदेशीर डेटाबेसचा सल्ला घेत आहे...",
+                "query1_title": "वाहतूक आणि पोलीस अधिकार",
+                "query1_text": "\"पोलीसानी माझी बाईकची चावी घेतली आहे.\"",
+                "query2_title": "भाडेकरू आणि मालमत्ता कायदा",
+                "query2_text": "\"घरमालक डिपॉझिट परत करत नाही.\"",
+                "query3_title": "ग्राहक संरक्षण",
+                "query3_text": "\"ऑनलाइन डिलिव्हरी फसवणूक आणि परतावा.\"",
+                "query4_title": "नागरी हक्क आणि आरटीआई",
+                "query4_text": "\"आरटीआय अर्ज कसा दाखल करावा.\"",
+                "query1_full": "पोलीसानी माझी बाईकची चावी घेतली आहे. हे कायदेशीर आहे का?",
+                "query2_full": "घरमालक घर सोडल्यानंतर माझी सुरक्षा ठेव परत करण्यास नकार देत आहे.",
+                "query3_full": "ऑनलाइन मोबाईल खरेदी केला पण बनावट मिळाला आणि कंपनी माझा परतावा नाकारत आहे.",
+                "query4_full": "मी ऑनलाइन आरटीआय (माहितीचा अधिकार) अर्ज कसा दाखल करू शकतो?"
+            },
+            "Telugu (తెలుగు)": {
+                "title": "AI లీగల్ యాక్షన్ అసిస్టెంట్",
+                "subtitle": "భారతదేశ లీగల్ గైడ్",
+                "welcome_title": "మీ చట్టపరమైన హక్కులను అర్థం చేసుకోండి",
+                "welcome_subtitle": "భారతదేశంలో ఏదైనా చట్టపరమైన పరిస్థితి గురించి అడగండి. తక్షణ కార్యాచరణ ప్రణాళికలు, సంబంధిత చట్టపరమైన సెక్షన్లు మరియు అధికారిక పరిష్కారాల కోసం దశలను పొందండి.",
+                "placeholder": "మీ చట్టపరమైన పరిస్థితిని వివరంగా వివరించండి...",
+                "back": "వెనుకకు",
+                "listen": "వినండి",
+                "stop": "ఆపండి",
+                "copy": "సమాధానం కాపీ చేయండి",
+                "copied": "కాపీ చేయబడింది!",
+                "consulting": "లీగల్ డేటాబేస్‌ను సంప్రదిస్తోంది...",
+                "query1_title": "ట్రాఫిక్ & పోలీసు హక్కులు",
+                "query1_text": "\"పోలీసులు నా బైక్ కీ తీసుకున్నారు.\"",
+                "query2_title": "టెనెంట్ & ప్రాపర్టీ లా",
+                "query2_text": "\"యజమాని డిపాజిట్ తిరిగి ఇవ్వడం లేదు.\"",
+                "query3_title": "వినియోగదారుల రక్షణ",
+                "query3_text": "\"ఆన్‌లైన్ డెలివరీ మోసం & రిటర్న్స్.\"",
+                "query4_title": "పౌర హక్కులు & RTI",
+                "query4_text": "\"RTI దరఖాస్తును ఎలా ఫైల్ చేయాలి.\"",
+                "query1_full": "పోలీసులు నా బైక్ కీ తీసుకున్నారు. ఇది చట్టబద్ధమేనా?",
+                "query2_full": "ఇల్లు ఖాళీ చేసిన తర్వాత యజమాని నా సెక్యూరిటీ డిపాజిట్‌ను తిరిగి ఇవ్వడానికి నిరాకరిస్తున్నారు.",
+                "query3_full": "ఆన్‌లైన్‌లో మొబైల్ కొన్నాను కానీ నకిలీది వచ్చింది మరియు కంపెనీ నా రిటర్న్‌ను తిరస్కరిస్తోంది.",
+                "query4_full": "నేను ఆన్‌లైన్‌లో RTI (సమాచార హక్కు) దరఖాస్తును ఎలా ఫైల్ చేయాలి?"
+            }
+        };
+
+        function applyTranslations(lang) {
+            const trans = uiTranslations[lang] || uiTranslations['English'];
+
+            document.getElementById('ui-title').textContent = trans.title;
+            document.getElementById('ui-subtitle').textContent = trans.subtitle;
+
+            const welcomeTitle = document.getElementById('ui-welcome-title');
+            if (welcomeTitle) welcomeTitle.textContent = trans.welcome_title;
+
+            const welcomeSub = document.getElementById('ui-welcome-subtitle');
+            if (welcomeSub) welcomeSub.textContent = trans.welcome_subtitle;
+
+            document.getElementById('user-input').placeholder = trans.placeholder;
+
+            const backBtnSpan = document.querySelector('#back-btn span');
+            if (backBtnSpan) backBtnSpan.textContent = trans.back;
+
+            const q1Title = document.getElementById('ui-q1-title');
+            if (q1Title) q1Title.textContent = trans.query1_title;
+            const q1Text = document.getElementById('ui-q1-text');
+            if (q1Text) q1Text.textContent = trans.query1_text;
+
+            const q2Title = document.getElementById('ui-q2-title');
+            if (q2Title) q2Title.textContent = trans.query2_title;
+            const q2Text = document.getElementById('ui-q2-text');
+            if (q2Text) q2Text.textContent = trans.query2_text;
+
+            const q3Title = document.getElementById('ui-q3-title');
+            if (q3Title) q3Title.textContent = trans.query3_title;
+            const q3Text = document.getElementById('ui-q3-text');
+            if (q3Text) q3Text.textContent = trans.query3_text;
+
+            const q4Title = document.getElementById('ui-q4-title');
+            if (q4Title) q4Title.textContent = trans.query4_title;
+            const q4Text = document.getElementById('ui-q4-text');
+            if (q4Text) q4Text.textContent = trans.query4_text;
+        }
+
+        function selectLanguage(lang) {
+            selectedLanguage = lang;
+            document.getElementById('current-lang').textContent = lang.split(' (')[0];
+            document.getElementById('lang-dropdown').classList.add('hidden');
+
+            // Reset local translations to English defaults first
+            applyTranslations('English');
+
+            // Apply local translations if available (e.g., Hindi)
+            if (uiTranslations[lang]) {
+                applyTranslations(lang);
+            }
+
+            const code = languageCodes[lang] || { google: 'en', speech: 'en-US' };
+
+            // 1. Update Speech Recognition
+            if (recognition) {
+                recognition.lang = code.speech;
+            }
+
+            // 2. Trigger Google Translate
+            const googleSelect = document.querySelector('.goog-te-combo');
+            if (googleSelect) {
+                googleSelect.value = code.google;
+                googleSelect.dispatchEvent(new Event('change'));
+            } else {
+                // Fallback: Set cookies and poll
+                document.cookie = "googtrans=/en/" + code.google + "; path=/";
+                document.cookie = "googtrans=/en/" + code.google + "; path=/; domain=" + location.hostname;
+
+                let attempts = 0;
+                const interval = setInterval(() => {
+                    const retrySelect = document.querySelector('.goog-te-combo');
+                    if (retrySelect) {
+                        retrySelect.value = code.google;
+                        retrySelect.dispatchEvent(new Event('change'));
+                        clearInterval(interval);
+                    }
+                    if (++attempts > 20) clearInterval(interval);
+                }, 250);
+            }
+        }
+
+        function filterLanguages() {
+            const query = document.getElementById('lang-search').value.toLowerCase();
+            const buttons = document.querySelectorAll('#lang-list button');
+
+            buttons.forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(query)) {
+                    btn.classList.remove('hidden');
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('language-selector-container');
+            const dropdown = document.getElementById('lang-dropdown');
+            if (container && !container.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        populateLanguages();
+
+        // Custom Animated Tooltip Implementation
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltip = document.createElement('div');
+            tooltip.id = 'custom-tooltip';
+            tooltip.className = 'absolute hidden z-[9999] px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-900/95 border border-slate-700/50 backdrop-blur-md rounded-xl shadow-xl pointer-events-none transition-all duration-150 ease-out opacity-0 transform scale-95 -translate-x-1/2 -translate-y-full mt-[-10px]';
+            document.body.appendChild(tooltip);
+
+            let activeTarget = null;
+
+            document.addEventListener('mouseover', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target) {
+                    activeTarget = target;
+                    const text = target.getAttribute('data-tooltip');
+                    if (text) {
+                        tooltip.textContent = text;
+                        tooltip.classList.remove('hidden');
+
+                        const updatePosition = () => {
+                            if (!activeTarget) return;
+                            const rect = activeTarget.getBoundingClientRect();
+                            tooltip.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
+                            tooltip.style.top = (rect.top + window.scrollY) + 'px';
+                        };
+
+                        updatePosition();
+
+                        requestAnimationFrame(() => {
+                            tooltip.classList.remove('opacity-0', 'scale-95');
+                            tooltip.classList.add('opacity-100', 'scale-100');
+                        });
+                    }
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                if (activeTarget && !activeTarget.contains(e.relatedTarget)) {
+                    activeTarget = null;
+                    tooltip.classList.add('opacity-0', 'scale-95');
+                    tooltip.classList.remove('opacity-100', 'scale-100');
+                    setTimeout(() => {
+                        if (tooltip.classList.contains('opacity-0')) {
+                            tooltip.classList.add('hidden');
+                        }
+                    }, 150);
+                }
+            });
+        });
+
+        // Door Animation Scripts
+        function openDoors() {
+            const overlay = document.getElementById('video-door-overlay');
+            const video = document.getElementById('intro-video');
+            
+            if (!overlay || overlay.classList.contains('hidden')) return;
+            
+            // Fade out full overlay smoothly
+            overlay.style.opacity = '0';
+            
+            if (video) {
+                try {
+                    setTimeout(() => {
+                        video.pause();
+                    }, 1000);
+                } catch (e) {}
+            }
+            
+            // Cleanup overlay from accessibility tree after fade completes
+            setTimeout(() => {
+                overlay.style.pointerEvents = 'none';
+                overlay.classList.add('hidden');
+            }, 1500);
+        }
+
+        function toggleMute() {
+            const video = document.getElementById('intro-video');
+            const muteIcon = document.getElementById('mute-icon');
+            const muteText = document.getElementById('mute-text');
+            
+            if (video) {
+                video.muted = !video.muted;
+                if (video.muted) {
+                    muteIcon.className = 'fa-solid fa-volume-xmark';
+                    muteText.textContent = 'Unmute Video';
+                } else {
+                    muteIcon.className = 'fa-solid fa-volume-high';
+                    muteText.textContent = 'Mute Video';
+                }
+            }
+        }
+
+        // Trigger Door opening after 7 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            // Play video
+            const video = document.getElementById('intro-video');
+            const overlay = document.getElementById('video-door-overlay');
+            
+            if (video) {
+                // 1. Force direct autoplay by starting muted (bypasses permission restriction)
+                video.muted = true;
+                video.play().then(() => {
+                    console.log("Direct autoplay started safely (muted).");
+                    
+                    // 3. Listen for ANY user interaction on the page to unlock audio globally
+                    const unlockAudio = () => {
+                        try {
+                            video.muted = false;
+                        } catch(e) {}
+                        console.log("Audio unlocked via user interaction.");
+                        document.removeEventListener('click', unlockAudio);
+                        document.removeEventListener('keydown', unlockAudio);
+                        document.removeEventListener('touchstart', unlockAudio);
+                    };
+                    document.addEventListener('click', unlockAudio);
+                    document.addEventListener('keydown', unlockAudio);
+                    document.addEventListener('touchstart', unlockAudio);
+                }).catch(err => {
+                    console.error("Direct playback blocked completely:", err);
+                });
+            }
+            
+            setTimeout(() => {
+                openDoors();
+            }, 7000); // 7 seconds delay
+        });
+    </script>
+
+    <!-- Google Translate Widget -->
+    <div id="google_translate_element" style="position: absolute; top: -9999px; left: -9999px; visibility: hidden;">
+    </div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+
+</html>
